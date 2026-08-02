@@ -1,6 +1,7 @@
 import { XMLParser } from 'fast-xml-parser'
 
-const FEED_URL = 'https://prod-qt-images.s3.amazonaws.com/production/swarajya/feed.xml'
+const STORIES_FEED_URL = 'https://swarajyamag.com/stories.rss'
+const RECENT_FEED_URL = 'https://prod-qt-images.s3.amazonaws.com/production/swarajya/feed.xml'
 const parser = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: '',
@@ -27,45 +28,6 @@ function cleanSummary(value) {
     .replace(/\s\w+$/, '')
 }
 
-function decodeEntities(value) {
-  return value.replace(/&amp;/g, '&').replace(/&#x27;|&#39;/g, "'").replace(/&quot;/g, '"')
-}
-
-function getMetaImage(html) {
-  const metaPattern = /<meta\s+[^>]*(?:property|name)=["'](?:og:image|twitter:image)["'][^>]*content=["']([^"']+)["'][^>]*>/i
-  const reversePattern = /<meta\s+[^>]*content=["']([^"']+)["'][^>]*(?:property|name)=["'](?:og:image|twitter:image)["'][^>]*>/i
-  const match = html.match(metaPattern) || html.match(reversePattern)
-  return match?.[1] ? decodeEntities(match[1]) : null
-}
-
-async function getStoryImage(articleUrl) {
-  try {
-    const url = new URL(articleUrl)
-    if (!['swarajyamag.com', 'www.swarajyamag.com'].includes(url.hostname)) return null
-    const response = await fetch(url, {
-      headers: { 'User-Agent': 'Swarajya Reader/1.0' },
-      signal: AbortSignal.timeout(5000),
-    })
-    if (!response.ok) return null
-    return getMetaImage(await response.text())
-  } catch {
-    return null
-  }
-}
-
-async function withConcurrency(items, mapper, limit = 6) {
-  const result = new Array(items.length)
-  let cursor = 0
-  async function worker() {
-    while (cursor < items.length) {
-      const index = cursor++
-      result[index] = await mapper(items[index])
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker))
-  return result
-}
-
 function normalizeEntry(entry, index) {
   const link = asArray(entry.link).find((item) => !item.rel || item.rel === 'alternate')
   return {
@@ -79,29 +41,62 @@ function normalizeEntry(entry, index) {
   }
 }
 
+function normalizeRssItem(item, index) {
+  return {
+    id: getText(item.guid) || `${getText(item.title)}-${index}`,
+    title: getText(item.title),
+    url: getText(item.link),
+    author: getText(item['atom:author']?.['atom:name']) || getText(item.author) || 'Swarajya',
+    published: getText(item['atom:updated']) || getText(item.pubDate),
+    summary: cleanSummary(item.description),
+    categories: asArray(item.category).map(getText).filter(Boolean),
+  }
+}
+
+function parseEntries(document) {
+  const atomChannel = document.feed
+  const rssChannel = document.rss?.channel
+  const entries = atomChannel
+    ? asArray(atomChannel.entry).map(normalizeEntry)
+    : asArray(rssChannel?.item).map(normalizeRssItem)
+
+  return {
+    entries: entries.filter((entry) => entry.title && entry.url),
+    updated: getText(atomChannel?.updated) || getText(rssChannel?.lastBuildDate),
+  }
+}
+
+async function retrieveFeed(url) {
+  const upstream = await fetch(url, {
+    headers: { 'User-Agent': 'Swarajya Reader/1.0' },
+    signal: AbortSignal.timeout(10000),
+  })
+  if (!upstream.ok) throw new Error(`Upstream returned ${upstream.status}`)
+  return parseEntries(parser.parse(await upstream.text()))
+}
+
 export default async function handler(request, response) {
   response.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=1800')
   try {
-    const upstream = await fetch(FEED_URL, {
-      headers: { 'User-Agent': 'Prism RSS Reader/1.0 (+https://github.com/testingcat/swarajya-reader)' },
-      signal: AbortSignal.timeout(10000),
-    })
-    if (!upstream.ok) throw new Error(`Upstream returned ${upstream.status}`)
-
-    const document = parser.parse(await upstream.text())
-    const channel = document.feed
-    const entries = asArray(channel?.entry).map(normalizeEntry).filter((entry) => entry.title && entry.url)
-    if (!entries.length) throw new Error('No feed entries found')
-    const images = await withConcurrency(entries, (entry) => getStoryImage(entry.url))
-    entries.forEach((entry, index) => { entry.image = images[index] })
+    const feeds = await Promise.allSettled([
+      retrieveFeed(STORIES_FEED_URL),
+      retrieveFeed(RECENT_FEED_URL),
+    ])
+    const availableFeeds = feeds.filter((result) => result.status === 'fulfilled').map((result) => result.value)
+    const primaryFeed = availableFeeds[0]
+    const stories = availableFeeds
+      .flatMap((feed) => feed.entries)
+      .filter((entry, index, entries) => entries.findIndex((candidate) => candidate.url === entry.url) === index)
+      .sort((a, b) => new Date(b.published) - new Date(a.published))
+    if (!stories.length) throw new Error('No feed entries found')
 
     response.status(200).json({
       source: 'Swarajya',
       sourceUrl: 'https://swarajyamag.com/',
-      feedUrl: FEED_URL,
-      updated: getText(channel.updated),
+      feedUrl: STORIES_FEED_URL,
+      updated: primaryFeed?.updated || stories[0].published,
       fetchedAt: new Date().toISOString(),
-      entries,
+      entries: stories,
     })
   } catch (error) {
     response.status(502).json({ error: 'Unable to retrieve the Swarajya feed.', detail: error.message })

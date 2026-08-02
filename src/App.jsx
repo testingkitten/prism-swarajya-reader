@@ -20,14 +20,6 @@ function shortDate(value) {
   }).format(new Date(value))
 }
 
-function StoryImage({ story, eager = false }) {
-  if (!story.image) {
-    return <div className="image-fallback" aria-hidden="true"><span>S</span></div>
-  }
-
-  return <img className="story-image" src={story.image} alt={story.title} loading={eager ? 'eager' : 'lazy'} />
-}
-
 function StoryMeta({ story }) {
   return (
     <p className="story-meta">
@@ -40,15 +32,12 @@ function StoryMeta({ story }) {
   )
 }
 
-function Story({ story, variant = 'standard', eager = false }) {
+function Story({ story, variant = 'standard' }) {
   return (
     <article className={`story story--${variant}`}>
-      <div className="story-media"><StoryImage story={story} eager={eager} /></div>
-      <div className="story-copy">
-        <StoryMeta story={story} />
-        <h2>{story.title}</h2>
-        {story.summary ? <p className="story-summary">{story.summary}</p> : null}
-      </div>
+      <StoryMeta story={story} />
+      <h2>{story.title}</h2>
+      {story.summary ? <p className="story-summary">{story.summary}</p> : null}
     </article>
   )
 }
@@ -133,7 +122,7 @@ function App() {
         {!loading && !error && lead ? (
           <>
             <section className="lead-grid" aria-label="Latest stories">
-              <Story story={lead} variant="lead" eager />
+              <Story story={lead} variant="lead" />
               <div className="supporting-stories">
                 {supporting.map((story) => <Story key={story.id} story={story} variant="supporting" />)}
               </div>

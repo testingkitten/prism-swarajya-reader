@@ -1,13 +1,13 @@
 # Swarajya
 
-A minimal editorial view of every item currently available in Swarajya's public Atom feed. It presents the feed's headline and summary metadata and retrieves the article's published social-preview image for each card.
+A minimal text-only view of every item currently available in Swarajya's public RSS feed. It presents the feed's headline and summary metadata in a single editorial page.
 
 ## What it does
 
-- Loads the verified production feed at `https://prod-qt-images.s3.amazonaws.com/production/swarajya/feed.xml`
+- Loads the current RSS feed at `https://swarajyamag.com/stories.rss`
 - Fetches through a small Vercel function, so the browser never has to contend with RSS CORS restrictions
-- Shows every currently supplied feed item in one image-led page
-- Uses original `Newsreader` and `Libre Franklin` typefaces for a classic newspaper feel; no New York Times fonts, marks, or artwork are included
+- Shows every currently supplied feed item in one text-only page
+- Uses open-source `Spectral` and `DM Sans` typefaces
 
 ## Run locally
 
