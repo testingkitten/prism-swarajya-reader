@@ -52,15 +52,15 @@ function cutAtFirstMatch(markdown, patterns) {
   return cutoff === undefined ? markdown : markdown.slice(0, cutoff)
 }
 
-function looksPaywalled(raw, markdown) {
+function looksPaywalled(raw) {
+  // Free public articles still show post-body CTAs such as "Don't Stop Midway!".
+  // Only treat true mid-article paywall gates as partial.
   const markers = [
     /Please Sign In To Continue Reading/i,
     /This is your last free article/i,
-    /Sign-in to get unlimited access/i,
-    /Don't Stop Midway!/i,
     /Please Sign In to read the full article/i,
   ]
-  return markers.some((marker) => marker.test(raw) || marker.test(markdown))
+  return markers.some((marker) => marker.test(raw))
 }
 
 function cleanMarkdown(raw, title) {
@@ -324,7 +324,7 @@ export default async function handler(request, response) {
     const markdown = cleanMarkdown(raw, title)
     if (!markdown) throw new Error('No article body found')
 
-    const partial = looksPaywalled(raw, markdown)
+    const partial = looksPaywalled(raw)
 
     response.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400')
     return response.status(200).json({

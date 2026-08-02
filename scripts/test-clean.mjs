@@ -10,8 +10,8 @@ const testSrc =
       'export function cleanMarkdown(raw, title) {',
     )
     .replace(
-      'function looksPaywalled(raw, markdown) {',
-      'export function looksPaywalled(raw, markdown) {',
+      'function looksPaywalled(raw) {',
+      'export function looksPaywalled(raw) {',
     ) + '\n'
 
 fs.writeFileSync('./tmp-article-test.mjs', testSrc)
