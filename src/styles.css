@@ -1,14 +1,207 @@
 /*
-  Typography roles (open-source stand-ins for the nyt-comm editorial system):
-  - --font-display  → Cheltenham role (masthead, major headlines)
-  - --font-sans     → Franklin role (nav, dates, categories, utility)
-  - --font-body     → Imperial role (long-form article body)
-
-  Proprietary NYT font files from FrancesCoronel/nyt-comm are not redistributed.
-  See README.md / FONTS.md for licensing notes.
+  Typography from FrancesCoronel/nyt-comm fonts:
+  - Cheltenham  → masthead & major headlines (--font-display)
+  - Franklin    → nav, dates, categories, utility (--font-sans)
+  - Imperial    → long-form article body (--font-body)
+  Source: https://github.com/FrancesCoronel/nyt-comm/tree/master/fonts
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,500&display=swap');
+/* —— Cheltenham (display / headlines) —— */
+@font-face {
+  font-family: 'Cheltenham';
+  src: url('/fonts/cheltenham/cheltenham-normal-300.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Cheltenham';
+  src: url('/fonts/cheltenham/cheltenham-normal-400.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Cheltenham';
+  src: url('/fonts/cheltenham/cheltenham-normal-500.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Cheltenham';
+  src: url('/fonts/cheltenham/cheltenham-normal-700.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Cheltenham';
+  src: url('/fonts/cheltenham/cheltenham-normal-800.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Cheltenham';
+  src: url('/fonts/cheltenham/cheltenham-italic-300.ttf') format('truetype');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Cheltenham';
+  src: url('/fonts/cheltenham/cheltenham-italic-400.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Cheltenham';
+  src: url('/fonts/cheltenham/cheltenham-italic-500.ttf') format('truetype');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Cheltenham';
+  src: url('/fonts/cheltenham/cheltenham-italic-700.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* —— Franklin (utility / UI) —— */
+@font-face {
+  font-family: 'Franklin';
+  src: url('/fonts/franklin/franklin-normal-300.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Franklin';
+  src: url('/fonts/franklin/franklin-normal-500.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Franklin';
+  src: url('/fonts/franklin/franklin-normal-500.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Franklin';
+  src: url('/fonts/franklin/franklin-normal-600.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Franklin';
+  src: url('/fonts/franklin/franklin-normal-700.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Franklin';
+  src: url('/fonts/franklin/franklin-normal-800.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Franklin';
+  src: url('/fonts/franklin/franklin-italic-500.ttf') format('truetype');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Franklin';
+  src: url('/fonts/franklin/franklin-italic-700.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Franklin Small — dense meta / labels */
+@font-face {
+  font-family: 'Franklin Small';
+  src: url('/fonts/franklin/franklin-small-normal-500.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Franklin Small';
+  src: url('/fonts/franklin/franklin-small-normal-700.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* —— Imperial (body text) —— */
+@font-face {
+  font-family: 'Imperial';
+  src: url('/fonts/imperial/imperial-normal-500.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Imperial';
+  src: url('/fonts/imperial/imperial-normal-500.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Imperial';
+  src: url('/fonts/imperial/imperial-normal-600.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Imperial';
+  src: url('/fonts/imperial/imperial-normal-700.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Imperial';
+  src: url('/fonts/imperial/imperial-italic-500.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Imperial';
+  src: url('/fonts/imperial/imperial-italic-500.ttf') format('truetype');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Imperial';
+  src: url('/fonts/imperial/imperial-italic-600.ttf') format('truetype');
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Imperial';
+  src: url('/fonts/imperial/imperial-italic-700.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
 
 :root {
   --ink: #1c1915;
@@ -21,9 +214,10 @@
   --paper: #f5f1e9;
   --paper-deep: #ebe5da;
 
-  --font-display: 'Newsreader', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
-  --font-sans: 'Libre Franklin', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  --font-body: 'Source Serif 4', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  --font-display: 'Cheltenham', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Franklin', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-meta: 'Franklin Small', 'Franklin', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-body: 'Imperial', Georgia, 'Times New Roman', serif;
 
   color: var(--ink);
   background: var(--paper);
@@ -76,6 +270,7 @@ a:focus-visible {
   justify-content: space-between;
   min-height: 28px;
   color: var(--muted);
+  font-family: var(--font-meta);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -117,9 +312,9 @@ a:focus-visible {
   text-align: center;
   font-family: var(--font-display);
   font-size: clamp(3.6rem, 8vw, 7.8rem);
-  font-weight: 600;
+  font-weight: 700;
   line-height: 0.78;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
 }
 
 .double-rule {
@@ -140,6 +335,7 @@ a:focus-visible {
   gap: 12px;
   min-height: 40px;
   color: var(--rule);
+  font-family: var(--font-meta);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.11em;
@@ -151,8 +347,9 @@ a:focus-visible {
   align-items: center;
   gap: 14px;
   color: var(--muted);
+  font-family: var(--font-meta);
   font-size: 9px;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0.04em;
   text-transform: none;
 }
@@ -205,6 +402,7 @@ main {
   gap: 5px;
   margin: 0 0 11px;
   color: var(--muted);
+  font-family: var(--font-meta);
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.055em;
@@ -234,6 +432,7 @@ main {
 .read-label {
   margin-top: 20px;
   color: var(--accent);
+  font-family: var(--font-meta);
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -300,6 +499,7 @@ main {
 .index-heading p {
   margin: 0;
   color: var(--muted);
+  font-family: var(--font-meta);
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -428,6 +628,7 @@ footer {
   padding: 10px 0;
   min-height: 44px;
   color: #675e53;
+  font-family: var(--font-meta);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.055em;
@@ -444,14 +645,15 @@ footer {
   color: var(--accent-deep);
   font-family: var(--font-display);
   font-size: 28px;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
 }
 
 .reader-section {
   justify-self: end;
   color: #70675c;
+  font-family: var(--font-meta);
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.09em;
@@ -593,6 +795,7 @@ footer {
   font-family: var(--font-sans);
   font-size: 0.78em;
   font-style: normal;
+  font-weight: 500;
   line-height: 1.45;
   letter-spacing: 0.01em;
 }

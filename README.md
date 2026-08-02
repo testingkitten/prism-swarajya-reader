@@ -81,7 +81,11 @@ When this endpoint is configured and succeeds, it is preferred over Jina / markd
 
 ## Typography
 
-See [FONTS.md](./FONTS.md). Proprietary NYT faces from the `FrancesCoronel/nyt-comm` design reference are **not** redistributed. Production uses role-mapped open fonts: Newsreader, Libre Franklin, Source Serif 4.
+See [FONTS.md](./FONTS.md). Faces from [`FrancesCoronel/nyt-comm/fonts`](https://github.com/FrancesCoronel/nyt-comm/tree/master/fonts) are self-hosted:
+
+- **Cheltenham** — masthead and headlines  
+- **Franklin** / **Franklin Small** — navigation, dates, categories, utility  
+- **Imperial** — long-form body text
 
 ## Attribution
 
