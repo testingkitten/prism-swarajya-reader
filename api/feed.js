@@ -22,6 +22,11 @@ function getText(value) {
 
 function cleanSummary(value) {
   return getText(value)
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;|&#x27;|&#39;/g, "'")
     .replace(/<[^>]*>/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()

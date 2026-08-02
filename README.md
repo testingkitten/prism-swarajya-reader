@@ -1,12 +1,13 @@
 # Swarajya
 
-A minimal text-only view of every item currently available in Swarajya's public RSS feed. It presents the feed's headline and summary metadata in a single editorial page.
+A minimal text-only reader for every item currently available in Swarajya's public RSS feed. Article pages are converted to Markdown through Jina Reader and rendered internally without images or outbound links.
 
 ## What it does
 
 - Loads the current RSS feed at `https://swarajyamag.com/stories.rss`
 - Fetches through a small Vercel function, so the browser never has to contend with RSS CORS restrictions
 - Shows every currently supplied feed item in one text-only page
+- Renders full article Markdown inside the reader through an allowlisted server endpoint
 - Uses open-source `Spectral` and `DM Sans` typefaces
 
 ## Run locally
