@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
-const FEED_VERSION = 'swarajya-v3'
+const FEED_VERSION = 'swarajya-v4'
+const ALLOWED_HOSTS = new Set(['swarajyamag.com', 'www.swarajyamag.com'])
 
 function formatDate(value, options = {}) {
   if (!value) return ''
@@ -32,6 +33,42 @@ function indianLongDate(value = new Date()) {
     month: 'long',
     year: 'numeric',
   }).format(value instanceof Date ? value : new Date(value))
+}
+
+/** Extract and canonicalize a Swarajya article URL from free text / clipboard paste. */
+function parseSwarajyaUrl(raw) {
+  if (!raw || typeof raw !== 'string') return null
+  const text = raw.trim()
+  if (!text) return null
+
+  // Prefer first URL-looking token in pasted text.
+  const match = text.match(/https?:\/\/[^\s<>"')\]]+/i) || text.match(/(?:www\.)?swarajyamag\.com\/[^\s<>"')\]]+/i)
+  let candidate = match ? match[0] : text
+  candidate = candidate.replace(/[.,;:!?)}\]]+$/g, '')
+
+  if (!/^https?:\/\//i.test(candidate)) {
+    if (/^(?:www\.)?swarajyamag\.com\//i.test(candidate)) {
+      candidate = `https://${candidate.replace(/^\/\//, '')}`
+    } else {
+      return null
+    }
+  }
+
+  try {
+    const url = new URL(candidate)
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') return null
+    if (!ALLOWED_HOSTS.has(url.hostname.toLowerCase())) return null
+    url.protocol = 'https:'
+    url.hostname = url.hostname.replace(/^www\./i, '').toLowerCase()
+    url.hash = ''
+    // Keep meaningful path; drop tracking query.
+    url.search = ''
+    url.pathname = url.pathname.replace(/\/+$/, '') || '/'
+    if (url.pathname === '/') return null
+    return url.toString()
+  } catch {
+    return null
+  }
 }
 
 function StoryMeta({ story }) {
@@ -70,7 +107,77 @@ function Story({ story, variant = 'standard', onOpen }) {
   )
 }
 
-function Header({ onRefresh, refreshing, updated, count }) {
+function ImportBar({ onImport, importError, onClearError }) {
+  const [value, setValue] = useState('')
+  const inputRef = useRef(null)
+
+  const tryImport = useCallback(
+    (text) => {
+      const url = parseSwarajyaUrl(text)
+      if (!url) return false
+      setValue('')
+      onImport(url)
+      return true
+    },
+    [onImport],
+  )
+
+  function handlePaste(event) {
+    const text = event.clipboardData?.getData('text') || ''
+    if (parseSwarajyaUrl(text)) {
+      event.preventDefault()
+      tryImport(text)
+    }
+  }
+
+  function handleChange(event) {
+    const next = event.target.value
+    setValue(next)
+    onClearError?.()
+    // Instant open when a full valid URL is typed/pasted into the field.
+    if (parseSwarajyaUrl(next)) {
+      tryImport(next)
+    }
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault()
+    if (!value.trim()) return
+    if (!tryImport(value)) onImport(value)
+  }
+
+  return (
+    <form className="import-bar" onSubmit={handleSubmit} aria-label="Open Swarajya article by link">
+      <label className="import-label" htmlFor="swarajya-import">
+        Paste link
+      </label>
+      <input
+        ref={inputRef}
+        id="swarajya-import"
+        className="import-input"
+        type="url"
+        inputMode="url"
+        autoComplete="off"
+        spellCheck={false}
+        placeholder="Paste any swarajyamag.com article link…"
+        value={value}
+        onChange={handleChange}
+        onPaste={handlePaste}
+        aria-invalid={importError ? 'true' : 'false'}
+        aria-describedby={importError ? 'import-error' : undefined}
+      />
+      {importError ? (
+        <p id="import-error" className="import-error" role="alert">
+          {importError}
+        </p>
+      ) : (
+        <p className="import-hint">Paste → opens instantly. Images render in the reader.</p>
+      )}
+    </form>
+  )
+}
+
+function Header({ onRefresh, refreshing, updated, count, onImport, importError, onClearError }) {
   return (
     <header className="masthead">
       <div className="utility-bar">
@@ -81,6 +188,7 @@ function Header({ onRefresh, refreshing, updated, count }) {
         </button>
       </div>
       <h1 className="masthead-name">Swarajya</h1>
+      <ImportBar onImport={onImport} importError={importError} onClearError={onClearError} />
       <div className="double-rule" aria-hidden="true" />
       <div className="subhead">
         <span>Latest stories</span>
@@ -111,12 +219,25 @@ function LoadingState() {
 function markdownComponents() {
   return {
     a: ({ children }) => <span className="link-text">{children}</span>,
-    img: () => null,
+    img: ({ src, alt }) => {
+      if (!src || !/^https?:\/\//i.test(src)) return null
+      return (
+        <img
+          className="article-image"
+          src={src}
+          alt={alt || ''}
+          title={alt || undefined}
+          loading="lazy"
+          decoding="async"
+          referrerPolicy="no-referrer"
+        />
+      )
+    },
     h1: ({ children }) => <h2>{children}</h2>,
   }
 }
 
-function ArticleView({ story, onClose }) {
+function ArticleView({ story, onClose, onImport, importError, onClearError }) {
   const [article, setArticle] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
@@ -129,7 +250,7 @@ function ArticleView({ story, onClose }) {
     document.title = `${story.title} — Swarajya`
     window.scrollTo({ top: 0, behavior: 'instant' })
 
-    fetch(`/api/article?url=${encodeURIComponent(story.url)}`)
+    fetch(`/api/article?url=${encodeURIComponent(story.url)}&v=images-1`)
       .then((response) => {
         if (!response.ok) throw new Error('Unable to load this article.')
         return response.json()
@@ -165,11 +286,22 @@ function ArticleView({ story, onClose }) {
         <span className="reader-section">{story.categories?.[0] || 'Article'}</span>
       </header>
 
+      <div className="reader-import-wrap">
+        <ImportBar onImport={onImport} importError={importError} onClearError={onClearError} />
+      </div>
+
       <main className="article-page">
         <article className="article-reading">
           <header className="article-header">
-            <StoryMeta story={story} />
-            <h1>{article?.title && story.title === 'Swarajya' ? article.title : story.title}</h1>
+            <StoryMeta
+              story={{
+                ...story,
+                author: article?.author || story.author,
+                published: article?.published || story.published,
+                categories: story.categories?.length ? story.categories : article?.categories || [],
+              }}
+            />
+            <h1>{article?.title && (!story.title || story.title === 'Swarajya') ? article.title : story.title}</h1>
           </header>
 
           {loading ? (
@@ -236,6 +368,7 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState('')
+  const [importError, setImportError] = useState('')
   const [articleUrl, setArticleUrl] = useState(() =>
     new URLSearchParams(window.location.search).get('article'),
   )
@@ -273,21 +406,64 @@ function App() {
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
-  useEffect(() => {
-    if (!articleUrl) document.title = 'Swarajya'
-  }, [articleUrl])
-
   const stories = useMemo(() => feed?.entries || [], [feed])
-  const selectedStory = articleUrl ? storyFromUrl(articleUrl, stories) : null
   const lead = stories[0]
   const supporting = stories.slice(1, 3)
   const remaining = stories.slice(3)
+
+  const openImportedUrl = useCallback((canonicalUrl) => {
+    const parsed = parseSwarajyaUrl(canonicalUrl)
+    if (!parsed) {
+      setImportError('Paste a full https://swarajyamag.com/… article link.')
+      return
+    }
+    setImportError('')
+    setArticleUrl((current) => {
+      const nextUrl = new URL(window.location.href)
+      nextUrl.searchParams.set('article', parsed)
+      if (current === parsed) {
+        window.history.replaceState({}, '', nextUrl)
+        // Remount same article.
+        queueMicrotask(() => setArticleUrl(parsed))
+        return null
+      }
+      window.history.pushState({}, '', nextUrl)
+      return parsed
+    })
+  }, [])
+
+  // Global paste: Ctrl/Cmd+V of a Swarajya URL opens the reader immediately.
+  useEffect(() => {
+    function handleGlobalPaste(event) {
+      const target = event.target
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable)
+      ) {
+        return
+      }
+      const text = event.clipboardData?.getData('text') || ''
+      const url = parseSwarajyaUrl(text)
+      if (!url) return
+      event.preventDefault()
+      openImportedUrl(url)
+    }
+    window.addEventListener('paste', handleGlobalPaste)
+    return () => window.removeEventListener('paste', handleGlobalPaste)
+  }, [openImportedUrl])
+
+  useEffect(() => {
+    if (!articleUrl) document.title = 'Swarajya'
+  }, [articleUrl])
 
   function openStory(story) {
     const url = new URL(window.location.href)
     url.searchParams.set('article', story.url)
     window.history.pushState({}, '', url)
     setArticleUrl(story.url)
+    setImportError('')
   }
 
   function closeStory() {
@@ -299,21 +475,18 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'instant' })
   }
 
-  // Direct internal article URLs work even before / after feed load.
-  if (selectedStory && articleUrl) {
-    // Wait briefly for feed metadata when available, but do not block first paint forever.
+  // Direct / pasted article URLs open immediately (no feed wait).
+  if (articleUrl) {
     const enriched = storyFromUrl(articleUrl, stories)
-    if (enriched.title === 'Swarajya' && loading) {
-      return (
-        <div className="page-shell">
-          <Header onRefresh={() => loadFeed(true)} refreshing={refreshing} />
-          <main>
-            <LoadingState />
-          </main>
-        </div>
-      )
-    }
-    return <ArticleView story={enriched} onClose={closeStory} />
+    return (
+      <ArticleView
+        story={enriched}
+        onClose={closeStory}
+        onImport={openImportedUrl}
+        importError={importError}
+        onClearError={() => setImportError('')}
+      />
+    )
   }
 
   return (
@@ -323,6 +496,9 @@ function App() {
         refreshing={refreshing}
         updated={feed?.updated || feed?.fetchedAt}
         count={stories.length || feed?.count}
+        onImport={openImportedUrl}
+        importError={importError}
+        onClearError={() => setImportError('')}
       />
       <main>
         {loading ? <LoadingState /> : null}

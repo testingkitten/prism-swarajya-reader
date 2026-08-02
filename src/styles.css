@@ -317,6 +317,79 @@ a:focus-visible {
   letter-spacing: -0.03em;
 }
 
+/* —— Paste / import bar —— */
+.import-bar {
+  width: min(720px, 100%);
+  margin: 0 auto 16px;
+  padding: 0 0 4px;
+}
+
+.import-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-family: var(--font-meta);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.import-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  background: #fffdf8;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  outline: none;
+  box-shadow: none;
+}
+
+.import-input::placeholder {
+  color: #9a9084;
+  font-weight: 400;
+}
+
+.import-input:focus {
+  border-color: var(--accent);
+  outline: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  outline-offset: 2px;
+}
+
+.import-hint,
+.import-error {
+  margin: 7px 0 0;
+  font-family: var(--font-meta);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+.import-hint {
+  color: var(--muted);
+}
+
+.import-error {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.reader-import-wrap {
+  width: min(100% - 36px, 720px);
+  margin: 12px auto 0;
+}
+
+.reader-import-wrap .import-bar {
+  margin-bottom: 0;
+}
+
 .double-rule {
   height: 5px;
   border-top: 1px solid var(--rule);
@@ -778,6 +851,18 @@ footer {
   padding: 0.08em 0.28em;
   background: var(--paper-deep);
   font-size: 0.86em;
+}
+
+.article-body .article-image,
+.article-body img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  margin: 1.5em 0 1.7em;
+  border: 0;
+  border-radius: 0;
+  background: var(--paper-deep);
 }
 
 .link-text {

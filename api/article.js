@@ -18,25 +18,22 @@ function stripFrontMatter(markdown) {
   return markdown.replace(/^---\n[\s\S]*?\n---\n*/, '')
 }
 
-function removeImages(markdown) {
-  const captions = []
+const CHROME_IMAGE_PATTERN =
+  /Swarajya-logo|whatsapp\.png|download-android|download-ios|articlespace\/assets|July-\d{4}-Cover|issue\/beneath|favicon|apple-touch/i
 
-  const withoutLinkedImages = markdown.replace(
-    /\[!\[([^\]]*)\]\([^)\n]+\)\]\([^)\n]+\)/g,
-    (_, alt) => {
-      captions.push(String(alt).replace(/^Image\s*\d+:\s*/i, '').trim())
-      return ''
-    },
+function normalizeImages(markdown) {
+  // Unwrap linked images: [![alt](img)](href) → ![alt](img)
+  let result = markdown.replace(
+    /\[!\[([^\]]*)\]\(([^)\n]+)\)\]\([^)\n]+\)/g,
+    (_, alt, src) => `![${String(alt).replace(/^Image\s*\d+:\s*/i, '').trim()}](${src})`,
   )
 
-  let result = withoutLinkedImages.replace(/!\[([^\]]*)\]\([^)\n]+\)/g, (_, alt) => {
-    captions.push(String(alt).replace(/^Image\s*\d+:\s*/i, '').trim())
-    return ''
+  // Drop site chrome / promo images; keep editorial article images.
+  result = result.replace(/!\[([^\]]*)\]\(([^)\n]+)\)/g, (full, alt, src) => {
+    if (CHROME_IMAGE_PATTERN.test(src) || CHROME_IMAGE_PATTERN.test(alt)) return ''
+    const cleanAlt = String(alt).replace(/^Image\s*\d+:\s*/i, '').trim()
+    return `![${cleanAlt}](${src})`
   })
-
-  for (const caption of captions.filter(Boolean)) {
-    result = result.replace(new RegExp(`^\\s*${escapeRegExp(caption)}\\s*$`, 'gmi'), '')
-  }
 
   return result
 }
@@ -89,7 +86,7 @@ function cleanMarkdown(raw, title) {
     if (firstImage >= 0) markdown = markdown.slice(firstImage)
   }
 
-  markdown = removeImages(markdown)
+  markdown = normalizeImages(markdown)
 
   // End the article before website chrome / promotions.
   markdown = cutAtFirstMatch(markdown, [
