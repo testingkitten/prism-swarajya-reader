@@ -1,12 +1,12 @@
-# Prism — Swarajya Reader
+# Swarajya
 
-A minimal editorial reader for the latest [Swarajya](https://swarajyamag.com/) stories. It reads the publication's publicly available Atom feed, presents headlines and feed-provided summaries, and sends readers to Swarajya for every full article.
+A minimal editorial view of every item currently available in Swarajya's public Atom feed. It presents the feed's headline and summary metadata and retrieves the article's published social-preview image for each card.
 
 ## What it does
 
 - Loads the verified production feed at `https://prod-qt-images.s3.amazonaws.com/production/swarajya/feed.xml`
 - Fetches through a small Vercel function, so the browser never has to contend with RSS CORS restrictions
-- Supports headline search, section filters, local-only saved stories, and refresh
+- Shows every currently supplied feed item in one image-led page
 - Uses original `Newsreader` and `Libre Franklin` typefaces for a classic newspaper feel; no New York Times fonts, marks, or artwork are included
 
 ## Run locally
@@ -24,4 +24,4 @@ Import the GitHub repository into Vercel, or use `vercel --prod` from this folde
 
 ## Attribution
 
-Prism is an independent feed reader. It is not affiliated with Swarajya or The New York Times. Article content and rights remain with their respective publisher.
+This is an independent feed interface. Article content and rights remain with their respective publisher.
